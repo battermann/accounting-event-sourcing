@@ -1,5 +1,6 @@
 import ErrorHandling._
 
+// Only for testing and demonstration purposes, don't use in production!
 object InMemoryEventStore {
   type Data = Event
   private var streams = Map[String, List[(Data, Int)]]()
