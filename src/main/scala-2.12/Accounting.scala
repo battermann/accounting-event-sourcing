@@ -109,6 +109,7 @@ object CommandHandling {
 }
 
 object ProcessManager {
+  // only happy day scenario, no compensating actions implemented
   def process(event: Event): List[(UUID, Command)] = {
     event match {
       case TransactionAccountDebited(srcAccount, amount, destAccount) =>
