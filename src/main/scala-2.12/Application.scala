@@ -7,7 +7,9 @@ object Application extends App {
   )
 
   // dependency injection by partial application
-  val handle = CommandHandling.handleCommand(store) _
+  val handle = {
+    CommandHandling.handleCommand(store, ProcessManager.process) _
+  }
 
   def query(accountId: UUID) = {
     store
@@ -15,19 +17,23 @@ object Application extends App {
       .map(events => Domain.replay(Uninitialized, events))
   }
 
-  val accountId = UUID.randomUUID()
+  val accountId1 = UUID.randomUUID()
+  val accountId2 = UUID.randomUUID()
 
   val commands = List(
-    CreateOnlineAccount(accountId),
-    MakeDeposit(accountId, 1000),
-    Withdraw(accountId, 500),
-    Withdraw(accountId, 501)
+    (accountId1, CreateOnlineAccount(accountId1)),
+    (accountId1, MakeDeposit(accountId1, 1000)),
+    (accountId2, CreateOnlineAccount(accountId2)),
+    (accountId1, MakeTransaction(accountId1, 500, accountId2))
   )
 
-  commands.foreach(cmd => {
-    val result = handle(accountId, cmd)
+  commands foreach { case (id, cmd) =>
+    println()
+    val result = handle(id, cmd)
     println(cmd)
     println(s"${result.fold(err => s"[ERROR] $err", _ => "[SUCCESS]")}")
-    println(s"current state: ${query(accountId).fold(err => "invalid", account => s"$account")}")
-  })
+    println(s"current state: ${query(id).fold(err => "invalid", account => s"$account")}")
+  }
+
+  println(s"current state: ${query(accountId2).fold(err => "invalid", account => s"$account")}")
 }
